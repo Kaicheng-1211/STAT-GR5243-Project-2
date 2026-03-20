@@ -10,3 +10,9 @@ This project covers the full data science workflow. The goal is to derive insigh
 
 - R
 - Dependencies listed in `requirements.txt`
+
+## Contributors
+
+- a
+- b
+- c
