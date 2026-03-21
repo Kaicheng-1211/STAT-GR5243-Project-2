@@ -8,7 +8,8 @@ This project covers the full data science workflow. The goal is to derive insigh
 
 ## Requirements
 
-- R
+- **R** (version 4.0 or higher)
+- **RStudio** (recommended)
 - Dependencies listed in `requirements.txt`
 
 ## Contributors
