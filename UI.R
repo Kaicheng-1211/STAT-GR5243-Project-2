@@ -104,6 +104,12 @@ ui <- dashboardPage(
                     actionButton("add_feature", "Add Feature"),
                     helpText("Example: Sepal.Length * alpha_keep")
                 ),
+                box(width = 4, title = "Simple Transformation", status = "primary",
+                    selectInput("feature_col", "Choose Numeric Column", choices = NULL),
+                    selectInput("transform_type", "Transformation",
+                                choices = c("None", "Log", "Square Root", "Square")),
+                    actionButton("apply_transform", "Apply Transformation")
+                ),
                 box(width = 8, title = "Updated Data", status = "info",
                     DTOutput("feature_data")
                 )
@@ -246,6 +252,26 @@ server <- function(input, output, session) {
     })
   })
   
+  observeEvent(input$apply_transform, {
+    df <- feature_data()
+    req(df, input$feature_col)
+    
+    col <- input$feature_col
+    new_name <- paste0(col, "_", gsub(" ", "_", tolower(input$transform_type)))
+    
+    if (input$transform_type == "Log") {
+      df[[new_name]] <- log(df[[col]] + 1)
+      
+    } else if (input$transform_type == "Square Root") {
+      df[[new_name]] <- sqrt(df[[col]])
+      
+    } else if (input$transform_type == "Square") {
+      df[[new_name]] <- df[[col]]^2
+    }
+    
+    feature_data(df)
+  })
+  
   output$feature_data <- renderDT({
     datatable(feature_data())
   })
@@ -256,6 +282,14 @@ server <- function(input, output, session) {
     if (!is.null(df)) {
       updateSelectInput(session, "x", choices = names(df))
       updateSelectInput(session, "y", choices = names(df))
+    }
+  })
+  
+  observe({
+    df <- feature_data()
+    if (!is.null(df)) {
+      numeric_cols <- names(df)[sapply(df, is.numeric)]
+      updateSelectInput(session, "feature_col", choices = numeric_cols)
     }
   })
   
