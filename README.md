@@ -8,6 +8,8 @@ This project is a versatile web application built with **R Shiny** that enables 
 - Upload datasets in multiple formats: **CSV**, **Excel (xlsx)**, **JSON**, and **RDS**.
 - Two built-in datasets (e.g., `iris`, `mtcars`) are provided for demonstration.
 
+### 2. Data Cleaning and Preprocessing
+
 ## Requirements
 
 - **R** (version 4.0 or higher)
