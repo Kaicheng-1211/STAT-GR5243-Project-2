@@ -67,7 +67,7 @@ ui <- dashboardPage(
               fluidRow(
                 box(width = 4, title = "Upload", status = "primary",
                     fileInput("file", "Upload File",
-                              accept = c(".csv", ".xlsx")),
+                              accept = c(".csv", ".xlsx",".json", ".rds")),
                     selectInput("dataset_builtin", "Or choose dataset",
                                 choices = c("None", "iris", "mtcars"))
                 ),
@@ -158,15 +158,26 @@ server <- function(input, output, session) {
   data <- reactive({
     if (!is.null(input$file)) {
       ext <- tools::file_ext(input$file$name)
+      
       if (ext == "csv") {
         read_csv(input$file$datapath)
       } else if (ext == "xlsx") {
         read_excel(input$file$datapath)
+      } else if (ext == "json") {
+        jsonlite::fromJSON(input$file$datapath)
+      } else if (ext == "rds") {
+        readRDS(input$file$datapath)
+      } else {
+        showNotification("Unsupported file format.", type = "error")
+        return(NULL)
       }
+      
     } else if (input$dataset_builtin == "iris") {
       iris
     } else if (input$dataset_builtin == "mtcars") {
       mtcars
+    } else {
+      NULL
     }
   })
   
