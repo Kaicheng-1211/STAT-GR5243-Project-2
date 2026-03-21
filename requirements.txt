@@ -1,1 +1,5 @@
-
+Install the necessary packages by running the following command in R:
+```r
+install.packages(c("shiny", "shinythemes", "DT", "readxl", "jsonlite", 
+                   "dplyr", "tidyr", "ggplot2", "plotly", "corrplot", 
+                   "shinyjs", "shinycssloaders"))
