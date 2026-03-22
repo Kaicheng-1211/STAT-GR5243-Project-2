@@ -51,13 +51,29 @@ ui <- dashboardPage(
       tabItem(tabName = "guide",
               fluidRow(
                 box(width = 12, title = "Welcome", status = "primary",
-                    h4("How to use this app:"),
+                    h3("Data Analysis App User Guide"),
+                    
+                    p("This app allows users to upload datasets, clean and preprocess data, perform feature engineering, and conduct exploratory data analysis interactively."),
+                    
+                    tags$hr(),
+                    
+                    h4("Steps to use the app"),
                     tags$ol(
-                      tags$li("Upload your dataset"),
-                      tags$li("Clean data"),
-                      tags$li("Create features"),
-                      tags$li("Explore with visualization")
+                      tags$li("Upload a CSV, Excel, JSON, or RDS dataset, or choose a built-in dataset."),
+                      tags$li("Use the Data Cleaning tab to remove missing values, duplicates, or scale numeric variables."),
+                      tags$li("Use the Feature Engineering tab to create new variables or apply transformations."),
+                      tags$li("Use the EDA tab to generate plots, summaries, and correlation analysis.")
+                    ),
+                    
+                    tags$hr(),
+                    
+                    h4("Tips"),
+                    tags$ul(
+                      tags$li("Histogram and boxplot work best with numeric variables."),
+                      tags$li("If your dataset has missing values, clean them first before plotting."),
+                      tags$li("Use built-in datasets like iris to quickly test the app.")
                     )
+                    
                 )
               )
       ),
