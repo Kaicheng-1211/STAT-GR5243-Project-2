@@ -1,4 +1,4 @@
-# STAT-GR5243-Project-2: Web Application Development and Deployment using R Shiny
+# STATGR5243 Project 2: Web Application Development and Deployment using R Shiny
 
 This project is a versatile web application built with **R Shiny** that enables users to upload datasets, perform data cleaning and preprocessing, engineer new features, and conduct exploratory data analysis (EDA) interactively. The application is designed to be user-friendly and flexible, allowing both novice and experienced analysts to explore and manipulate data without writing code. It serves as a practical tool for data scientists, students, and professionals who need a quick, interactive environment for data understanding and transformation.
 
