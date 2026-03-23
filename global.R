@@ -93,10 +93,13 @@ BUILTIN_DESCRIPTIONS <- list(
 # Helper Functions
 # =============================================================================
 
+#' Backtick-escape column names for safe use in R formulas
+#' Handles names with special characters like %, $, spaces, etc.
+bt <- function(x) {
+    ifelse(grepl("^[a-zA-Z.][a-zA-Z0-9._]*$", x), x, paste0("`", x, "`"))
+}
+
 #' Read a dataset from an uploaded file based on its extension
-#' @param filepath Path to the uploaded file
-#' @param filename Original filename (used for extension detection)
-#' @return A data.frame or NULL on failure
 read_uploaded_file <- function(filepath, filename) {
     ext <- tolower(tools::file_ext(filename))
     tryCatch(
@@ -122,91 +125,71 @@ read_uploaded_file <- function(filepath, filename) {
 }
 
 #' Generate a data profile summary for a data.frame
-#' @param df A data.frame
-#' @return A tibble with one row per column containing type, missing %, unique count, etc.
 generate_data_profile <- function(df) {
-    tibble::tibble(
+    profile <- data.frame(
         Column = names(df),
         Type = sapply(df, function(x) class(x)[1]),
         N_Missing = sapply(df, function(x) sum(is.na(x))),
         Pct_Missing = round(sapply(df, function(x) mean(is.na(x))) * 100, 1),
         N_Unique = sapply(df, function(x) length(unique(x))),
-        N_Total = nrow(df)
-    ) %>%
-        mutate(
-            Alert = case_when(
-                Pct_Missing > 50 ~ "⚠️ >50% missing — consider dropping",
-                Pct_Missing > 20 ~ "🔶 >20% missing — imputation recommended",
-                N_Unique == 1 ~ "⚠️ Constant column",
-                N_Unique == N_Total & Type == "character" ~ "🔶 All unique (possible ID column)",
-                TRUE ~ "✅ OK"
+        N_Total = nrow(df),
+        stringsAsFactors = FALSE
+    )
+    profile$Alert <- ifelse(
+        profile$Pct_Missing > 50, "!! >50% missing - consider dropping",
+        ifelse(profile$Pct_Missing > 20, "! >20% missing - imputation recommended",
+            ifelse(profile$N_Unique == 1, "!! Constant column",
+                ifelse(profile$N_Unique == profile$N_Total & profile$Type == "character",
+                    "! All unique (possible ID column)", "OK"
+                )
             )
         )
+    )
+    profile
 }
 
 #' Compute skewness and kurtosis for all numeric columns
-#' @param df A data.frame
-#' @return A tibble with skewness, kurtosis, and normality test results
 compute_moments <- function(df) {
     num_cols <- names(df)[sapply(df, is.numeric)]
     if (length(num_cols) == 0) {
-        return(tibble::tibble())
+        return(data.frame())
     }
 
-    purrr::map_dfr(num_cols, function(col) {
-        x <- na.omit(df[[col]])
+    results <- lapply(num_cols, function(col) {
+        x <- na.omit(as.numeric(df[[col]]))
         if (length(x) < 4) {
-            return(tibble::tibble(
+            return(data.frame(
                 Column = col, Skewness = NA_real_, Kurtosis = NA_real_,
                 Skew_Direction = "Insufficient data", Normality_p = NA_real_,
-                Suggestion = "Need ≥ 4 non-NA observations"
+                Suggestion = "Need >= 4 non-NA observations",
+                stringsAsFactors = FALSE
             ))
         }
         sk <- moments::skewness(x)
         ku <- moments::kurtosis(x)
         sw_p <- tryCatch(shapiro.test(x[1:min(length(x), 5000)])$p.value, error = function(e) NA_real_)
 
-        direction <- dplyr::case_when(
-            sk < -0.5 ~ "⬅️ Left-skewed",
-            sk > 0.5 ~ "➡️ Right-skewed",
-            TRUE ~ "↔️ Approximately symmetric"
-        )
+        direction <- if (sk < -0.5) "Left-skewed" else if (sk > 0.5) "Right-skewed" else "Approx. symmetric"
+        suggestion <- if (abs(sk) > 2) "Strong skew - try log or Box-Cox" else if (abs(sk) > 1) "Moderate skew - consider sqrt or log" else if (abs(sk) > 0.5) "Mild skew - may benefit from sqrt" else "No transform needed"
 
-        suggestion <- dplyr::case_when(
-            abs(sk) > 2 ~ "Strong skew — try log or Box-Cox transform",
-            abs(sk) > 1 ~ "Moderate skew — consider sqrt or log transform",
-            abs(sk) > 0.5 ~ "Mild skew — may benefit from sqrt transform",
-            TRUE ~ "No transform needed"
-        )
-
-        tibble::tibble(
-            Column = col,
-            Skewness = round(sk, 3),
-            Kurtosis = round(ku, 3),
-            Skew_Direction = direction,
-            Normality_p = round(sw_p, 4),
-            Suggestion = suggestion
+        data.frame(
+            Column = col, Skewness = round(sk, 3), Kurtosis = round(ku, 3),
+            Skew_Direction = direction, Normality_p = round(sw_p, 4),
+            Suggestion = suggestion, stringsAsFactors = FALSE
         )
     })
+    do.call(rbind, results)
 }
 
 #' Fit multiple distributions to a numeric vector and return comparison table
-#' @param x Numeric vector (non-NA, positive for some distributions)
-#' @return A list with fit objects and comparison table
 fit_distributions <- function(x) {
-    x <- na.omit(x)
+    x <- na.omit(as.numeric(x))
     if (length(x) < 10) {
         return(NULL)
     }
 
-    # Determine which distributions to try
     dists <- c("norm")
-    if (all(x > 0)) {
-        dists <- c(dists, "lnorm", "exp", "gamma", "weibull")
-    }
-    if (all(x >= 0)) {
-        dists <- c(dists, "pois") # only if integer-like
-    }
+    if (all(x > 0)) dists <- c(dists, "lnorm", "exp", "gamma", "weibull")
 
     fits <- list()
     comparison <- list()
@@ -214,66 +197,62 @@ fit_distributions <- function(x) {
     for (d in dists) {
         tryCatch(
             {
-                if (d == "pois") {
-                    # Poisson only makes sense for non-negative integers
-                    if (!all(x == floor(x))) next
-                    f <- fitdistrplus::fitdist(as.integer(x), d)
-                } else {
-                    f <- fitdistrplus::fitdist(x, d)
-                }
+                f <- fitdistrplus::fitdist(x, d)
                 fits[[d]] <- f
-                comparison[[d]] <- tibble::tibble(
+                comparison[[d]] <- data.frame(
                     Distribution = d,
                     AIC = round(f$aic, 2),
                     BIC = round(f$bic, 2),
-                    LogLik = round(f$loglik, 2)
+                    LogLik = round(f$loglik, 2),
+                    stringsAsFactors = FALSE
                 )
             },
             error = function(e) NULL
         )
     }
 
-    list(
-        fits = fits,
-        comparison = dplyr::bind_rows(comparison) %>% dplyr::arrange(AIC)
-    )
+    comp_df <- do.call(rbind, comparison)
+    if (!is.null(comp_df)) comp_df <- comp_df[order(comp_df$AIC), ]
+
+    list(fits = fits, comparison = comp_df)
 }
 
 #' Compute Cook's Distance and leverage for a linear model
-#' @param df Data frame
-#' @param response Character: name of response variable
-#' @param predictors Character vector: names of predictor variables
-#' @return A list with influence measures and the model
 compute_influence <- function(df, response, predictors) {
-    # Build formula
-    fml <- as.formula(paste(response, "~", paste(predictors, collapse = " + ")))
+    # Backtick-escape column names with special characters (%, spaces, etc.)
+    fml <- as.formula(paste(bt(response), "~", paste(bt(predictors), collapse = " + ")))
     model <- lm(fml, data = df, na.action = na.exclude)
 
-    infl <- influence.measures(model)
-
-    # Thresholds
     n <- nrow(model$model)
     p <- length(predictors) + 1
     cooks_threshold <- 4 / n
     leverage_threshold <- 2 * p / n
 
-    result <- tibble::tibble(
-        Row = 1:n,
-        Cooks_Distance = round(cooks.distance(model), 4),
-        Leverage = round(hatvalues(model), 4),
-        Std_Residual = round(rstandard(model), 4),
-        DFFITS = round(dffits(model), 4),
-        Influential = cooks.distance(model) > cooks_threshold,
-        High_Leverage = hatvalues(model) > leverage_threshold
-    ) %>%
-        mutate(
-            Status = case_when(
-                Influential & High_Leverage ~ "🔴 High Influence + Leverage",
-                Influential ~ "🟠 High Influence",
-                High_Leverage ~ "🟡 High Leverage",
-                TRUE ~ "🟢 Normal"
-            )
+    cd <- cooks.distance(model)
+    hv <- hatvalues(model)
+    sr <- rstandard(model)
+    df_val <- dffits(model)
+    infl_flag <- cd > cooks_threshold
+    lev_flag <- hv > leverage_threshold
+
+    status <- ifelse(
+        infl_flag & lev_flag, "High Influence + Leverage",
+        ifelse(infl_flag, "High Influence",
+            ifelse(lev_flag, "High Leverage", "Normal")
         )
+    )
+
+    result <- data.frame(
+        Row = 1:n,
+        Cooks_Distance = round(cd, 4),
+        Leverage = round(hv, 4),
+        Std_Residual = round(sr, 4),
+        DFFITS = round(df_val, 4),
+        Influential = infl_flag,
+        High_Leverage = lev_flag,
+        Status = status,
+        stringsAsFactors = FALSE
+    )
 
     list(
         diagnostics = result,
