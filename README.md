@@ -4,7 +4,7 @@
 
 ## 🚀 Live Demo
 
-> **Deployed App**: [Insert shinyapps.io link here]
+> **Deployed App**: [https://statgr5243team18.shinyapps.io/stat-gr5243-project-2/](https://statgr5243team18.shinyapps.io/stat-gr5243-project-2/)
 
 ## ✨ Features
 
@@ -59,7 +59,6 @@
 
 ### 7. User Experience
 - Modern **Bootstrap 5** UI via `bslib`
-- **Dark mode** toggle
 - Responsive design for desktop and mobile
 - Premium styling with gradient accents, card animations, and smooth transitions
 - Comprehensive **User Guide** with step-by-step walkthrough and FAQ accordion
@@ -119,6 +118,7 @@ STAT-GR5243-Project-2/
 
 ## 👥 Contributors
 
-- Contributor A
-- Contributor B
-- Contributor C
+- Ayaz Khan (aak2259)
+- Kaicheng Li (kl3728)
+- Yueyou Tao (yt2995)
+- Tiange Wang (tw3106)
