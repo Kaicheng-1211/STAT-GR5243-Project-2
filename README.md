@@ -1,32 +1,124 @@
-# STATGR5243 Project 2: Web Application Development and Deployment using R Shiny
+# STAT-GR5243 Project 2: DataScope — Interactive Data Analysis Web Application
 
-This project is a versatile web application built with **R Shiny** that enables users to upload datasets, perform data cleaning and preprocessing, engineer new features, and conduct exploratory data analysis (EDA) interactively. The application is designed to be user-friendly and flexible, allowing both novice and experienced analysts to explore and manipulate data without writing code. It serves as a practical tool for data scientists, students, and professionals who need a quick, interactive environment for data understanding and transformation.
+**DataScope** is a comprehensive web application built with **R Shiny** that enables users to upload datasets, clean and preprocess data, engineer new features, conduct exploratory data analysis, fit probability distributions, and run regression diagnostics — all through an interactive, code-free interface.
 
-## Features
+## 🚀 Live Demo
+
+> **Deployed App**: [Insert shinyapps.io link here]
+
+## ✨ Features
 
 ### 1. Dataset Loading
-- Upload datasets in multiple formats: **CSV**, **Excel (xlsx)**, **JSON**, and **RDS**.
-- Two built-in datasets (e.g., `iris`, `mtcars`) are provided for demonstration.
+- Upload files in **CSV**, **Excel (.xlsx/.xls)**, **JSON**, **TSV**, and **RDS** formats
+- Three built-in datasets: `iris`, `mtcars`, `diamonds`
+- Automatic **data profiling** with column types, missing %, unique counts, and actionable alerts
+- **Missingness heatmap** and row-level imputation diagnostics
 
-### 2. Data Cleaning and Preprocessing
+### 2. Data Cleaning & Preprocessing
+- Missing values: remove rows, remove columns (by threshold %), or impute (mean/median/mode)
+- Duplicate detection and removal
+- Scaling: Z-Score, Min-Max, Robust (Median/IQR)
+- Categorical encoding: Label Encoding, One-Hot Encoding
+- Outlier detection (IQR, Z-Score) with treatment options (remove, cap/winsorize, flag)
+- Before/after comparison view and cleaning log
 
-## Requirements
+### 3. Feature Engineering
+- Transformations: Log, Sqrt, Square, Box-Cox, Reciprocal, Cube Root
+- Interaction term builder (multiply, add, divide)
+- Binning: Equal-width and Quantile-based
+- Custom R formula engine
+- **Live before/after distribution previews**
+- **Skewness report** with auto-suggestions for transformations
+- 10-level undo stack
 
-- **R** (version 4.0 or higher)
+### 4. Exploratory Data Analysis (EDA)
+- 7 interactive plot types: Histogram, Density, Scatter, Boxplot, Violin, Bar, QQ-Plot
+- All plots rendered via **plotly** (hover, zoom, download)
+- Dynamic data filtering (numeric range sliders, categorical checkboxes)
+- Correlation heatmap (Pearson, Spearman, Kendall)
+- **Pairs plots** via GGally
+- **Spectral analysis** with periodogram for frequency detection
+- Summary statistics via `skimr`
+- KPI dashboard (rows, columns, missing %, type breakdown)
+
+### 5. Distribution Fitting Lab
+- Fit multiple distributions simultaneously: Normal, Log-Normal, Exponential, Gamma, Weibull
+- **Density overlay** plots (empirical vs. fitted)
+- **AIC/BIC/KS comparison table**
+- **Cullen-Frey** (skewness-kurtosis) diagram for distribution selection
+- Goodness-of-fit diagnostic plots
+
+### 6. Regression Diagnostics
+- Specify response and predictors for an OLS linear model
+- **Cook's Distance** bar chart with threshold line
+- **Leverage plot** (studentized residuals vs. hat values)
+- **DFFITS** influence measures
+- Color-coded influence table (🔴 high influence, 🟡 high leverage, 🟢 normal)
+- One-click removal of influential points with automatic model re-fitting
+- Standard residual diagnostic plots (Residuals vs Fitted, Normal Q-Q, Scale-Location, Cook's D)
+
+### 7. User Experience
+- Modern **Bootstrap 5** UI via `bslib`
+- **Dark mode** toggle
+- Responsive design for desktop and mobile
+- Premium styling with gradient accents, card animations, and smooth transitions
+- Comprehensive **User Guide** with step-by-step walkthrough and FAQ accordion
+
+## 📦 Requirements
+
+- **R** (version 4.2 or higher)
 - **RStudio** (recommended)
-- Dependencies listed in `requirements.txt`
 
-## Project Structure
+### Install Dependencies
+
+```r
+install.packages(c(
+  "shiny", "bslib", "shinyjs", "shinyWidgets", "shinyFeedback", "waiter",
+  "readr", "readxl", "jsonlite",
+  "dplyr", "tidyr", "recipes",
+  "ggplot2", "plotly", "corrplot", "GGally", "thematic",
+  "moments", "fitdistrplus", "naniar",
+  "skimr", "DT", "MASS", "purrr"
+))
+```
+
+## 🏗️ Project Structure
 
 ```
-STATGR5243-Project2/
-├── Project_Report.pdf            # Project report
-├── requirements.txt              # Python dependencies
-└── README.md
+STAT-GR5243-Project-2/
+├── app.R                        # Entry point
+├── global.R                     # Packages, themes, helper functions
+├── R/
+│   ├── mod_guide.R              # User Guide module
+│   ├── mod_upload.R             # Dataset loading & profiling
+│   ├── mod_cleaning.R           # Data cleaning & preprocessing
+│   ├── mod_feature.R            # Feature engineering
+│   ├── mod_eda.R                # Exploratory data analysis
+│   ├── mod_distributions.R      # Distribution fitting lab
+│   └── mod_diagnostics.R        # Regression diagnostics
+├── www/
+│   └── custom.css               # Custom styling
+├── README.md
+├── requirements.txt
+└── STAT-GR5243-Project-2.Rproj
 ```
 
-## Contributors
+## ▶️ How to Run
 
-- a
-- b
-- c
+1. Clone this repository:
+   ```bash
+   git clone https://github.com/YOUR-USERNAME/STAT-GR5243-Project-2.git
+   cd STAT-GR5243-Project-2
+   ```
+2. Open `STAT-GR5243-Project-2.Rproj` in RStudio
+3. Install dependencies (see above)
+4. Click **"Run App"** in RStudio, or run:
+   ```r
+   shiny::runApp()
+   ```
+
+## 👥 Contributors
+
+- Contributor A
+- Contributor B
+- Contributor C

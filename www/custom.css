@@ -1,0 +1,337 @@
+/* =============================================================================
+   custom.css — Premium Styling for Data Analysis App
+   STAT-GR5243 Project 2
+   ============================================================================= */
+
+/* ── Root Variables ── */
+:root {
+  --gradient-primary: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  --gradient-success: linear-gradient(135deg, #11998e 0%, #38ef7d 100%);
+  --gradient-info: linear-gradient(135deg, #2193b0 0%, #6dd5ed 100%);
+  --gradient-warning: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+  --gradient-danger: linear-gradient(135deg, #eb3349 0%, #f45c43 100%);
+  --shadow-sm: 0 2px 8px rgba(0, 0, 0, 0.08);
+  --shadow-md: 0 4px 16px rgba(0, 0, 0, 0.12);
+  --shadow-lg: 0 8px 32px rgba(0, 0, 0, 0.16);
+  --transition-base: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  --border-radius-lg: 12px;
+  --border-radius-xl: 16px;
+}
+
+/* ── Global Enhancements ── */
+body {
+  font-feature-settings: "kern" 1, "liga" 1;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+/* ── Navbar Styling ── */
+.navbar {
+  box-shadow: var(--shadow-md) !important;
+  backdrop-filter: blur(10px);
+}
+
+.navbar-brand {
+  font-weight: 700 !important;
+  font-size: 1.3rem !important;
+  letter-spacing: -0.02em;
+}
+
+/* ── Card Enhancements ── */
+.card {
+  border: none !important;
+  border-radius: var(--border-radius-lg) !important;
+  box-shadow: var(--shadow-sm) !important;
+  transition: var(--transition-base);
+  overflow: hidden;
+}
+
+.card:hover {
+  box-shadow: var(--shadow-md) !important;
+  transform: translateY(-2px);
+}
+
+.card-header {
+  font-weight: 600;
+  border-bottom: 2px solid rgba(0, 0, 0, 0.05) !important;
+  padding: 1rem 1.25rem !important;
+}
+
+/* ── Value Boxes ── */
+.bslib-value-box {
+  border-radius: var(--border-radius-lg) !important;
+  box-shadow: var(--shadow-sm) !important;
+  transition: var(--transition-base);
+  border: none !important;
+}
+
+.bslib-value-box:hover {
+  transform: translateY(-3px);
+  box-shadow: var(--shadow-md) !important;
+}
+
+/* ── Gradient Value Box Variants ── */
+.value-box-primary .bslib-value-box {
+  background: var(--gradient-primary) !important;
+}
+
+.value-box-success .bslib-value-box {
+  background: var(--gradient-success) !important;
+}
+
+.value-box-info .bslib-value-box {
+  background: var(--gradient-info) !important;
+}
+
+.value-box-warning .bslib-value-box {
+  background: var(--gradient-warning) !important;
+}
+
+/* ── Sidebar ── */
+.bslib-sidebar-layout > .sidebar {
+  border-right: 1px solid rgba(0, 0, 0, 0.08) !important;
+  background: rgba(248, 249, 250, 0.95) !important;
+}
+
+/* ── Buttons ── */
+.btn {
+  border-radius: 8px !important;
+  font-weight: 500;
+  transition: var(--transition-base);
+  text-transform: none;
+  letter-spacing: 0.01em;
+}
+
+.btn-primary {
+  box-shadow: 0 2px 8px rgba(44, 62, 80, 0.3);
+}
+
+.btn-primary:hover {
+  box-shadow: 0 4px 16px rgba(44, 62, 80, 0.4);
+  transform: translateY(-1px);
+}
+
+.btn-success {
+  box-shadow: 0 2px 8px rgba(24, 188, 156, 0.3);
+}
+
+.action-button {
+  min-width: 120px;
+}
+
+/* ── Form Controls ── */
+.form-control, .form-select {
+  border-radius: 8px !important;
+  border: 1.5px solid #dee2e6 !important;
+  transition: var(--transition-base);
+  padding: 0.5rem 0.75rem;
+}
+
+.form-control:focus, .form-select:focus {
+  border-color: #667eea !important;
+  box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.15) !important;
+}
+
+/* ── DataTable Styling ── */
+.dataTables_wrapper {
+  border-radius: var(--border-radius-lg);
+  overflow: hidden;
+}
+
+table.dataTable thead th {
+  font-weight: 600 !important;
+  text-transform: uppercase;
+  font-size: 0.8rem;
+  letter-spacing: 0.05em;
+  border-bottom: 2px solid #dee2e6 !important;
+}
+
+table.dataTable tbody tr:hover {
+  background-color: rgba(102, 126, 234, 0.05) !important;
+}
+
+/* ── Plotly Container ── */
+.js-plotly-plot {
+  border-radius: var(--border-radius-lg);
+}
+
+/* ── Tab Navigation ── */
+.nav-tabs .nav-link, .nav-pills .nav-link {
+  border-radius: 8px !important;
+  font-weight: 500;
+  transition: var(--transition-base);
+  margin: 0 2px;
+}
+
+.nav-pills .nav-link.active {
+  box-shadow: var(--shadow-sm);
+}
+
+/* ── Status Badges ── */
+.badge {
+  font-weight: 500;
+  padding: 0.4em 0.8em;
+  border-radius: 6px;
+}
+
+/* ── Accordion ── */
+.accordion-button {
+  font-weight: 500;
+  border-radius: 8px !important;
+}
+
+.accordion-item {
+  border-radius: var(--border-radius-lg) !important;
+  margin-bottom: 0.5rem;
+  border: 1px solid rgba(0, 0, 0, 0.08) !important;
+  overflow: hidden;
+}
+
+/* ── Alert Boxes (for data profiling) ── */
+.alert {
+  border-radius: var(--border-radius-lg) !important;
+  border: none !important;
+  box-shadow: var(--shadow-sm);
+}
+
+/* ── Scrollbar ── */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+  background: rgba(0, 0, 0, 0.15);
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: rgba(0, 0, 0, 0.25);
+}
+
+/* ── Loading Overlay ── */
+.waiter-overlay {
+  border-radius: var(--border-radius-lg);
+}
+
+/* ── Responsive Adjustments ── */
+@media (max-width: 768px) {
+  .navbar-brand {
+    font-size: 1rem !important;
+  }
+  
+  .card {
+    margin-bottom: 1rem;
+  }
+  
+  .bslib-value-box {
+    margin-bottom: 0.5rem;
+  }
+}
+
+/* ── Animations ── */
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.card {
+  animation: fadeInUp 0.4s ease-out;
+}
+
+/* ── Profile Table Row Highlights ── */
+.profile-alert-warn {
+  background-color: rgba(243, 156, 18, 0.1) !important;
+}
+
+.profile-alert-danger {
+  background-color: rgba(231, 76, 60, 0.1) !important;
+}
+
+/* ── Influence Status Colors ── */
+.influence-high {
+  background-color: rgba(231, 76, 60, 0.15) !important;
+  font-weight: 600;
+}
+
+.influence-moderate {
+  background-color: rgba(243, 156, 18, 0.15) !important;
+}
+
+.influence-leverage {
+  background-color: rgba(241, 196, 15, 0.15) !important;
+}
+
+/* ── Welcome Hero Section ── */
+.hero-section {
+  background: var(--gradient-primary);
+  border-radius: var(--border-radius-xl);
+  padding: 2.5rem;
+  color: white;
+  margin-bottom: 1.5rem;
+  box-shadow: var(--shadow-lg);
+}
+
+.hero-section h2 {
+  font-weight: 700;
+  margin-bottom: 1rem;
+}
+
+.hero-section p {
+  opacity: 0.9;
+  font-size: 1.1rem;
+  line-height: 1.6;
+}
+
+/* ── Step Cards (User Guide) ── */
+.step-card {
+  display: flex;
+  align-items: flex-start;
+  gap: 1rem;
+  padding: 1.25rem;
+  background: white;
+  border-radius: var(--border-radius-lg);
+  box-shadow: var(--shadow-sm);
+  margin-bottom: 1rem;
+  transition: var(--transition-base);
+}
+
+.step-card:hover {
+  box-shadow: var(--shadow-md);
+  transform: translateX(4px);
+}
+
+.step-number {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 40px;
+  height: 40px;
+  min-width: 40px;
+  border-radius: 50%;
+  background: var(--gradient-primary);
+  color: white;
+  font-weight: 700;
+  font-size: 1.1rem;
+}
+
+.step-content h5 {
+  margin-bottom: 0.3rem;
+  font-weight: 600;
+}
+
+.step-content p {
+  margin: 0;
+  color: #6c757d;
+  font-size: 0.95rem;
+}
