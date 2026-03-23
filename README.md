@@ -21,7 +21,7 @@ This project is a versatile web application built with **R Shiny** that enables 
 ```
 STATGR5243-Project2/
 ├── Project_Report.pdf            # Project report
-├── requirements.txt              # Python dependencies
+├── requirements.txt              # R dependencies
 └── README.md
 ```
 
