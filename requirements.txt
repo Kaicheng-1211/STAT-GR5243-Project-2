@@ -1,5 +1,40 @@
-Install the necessary packages by running the following command in R:
-```r
-install.packages(c("shiny", "shinythemes", "DT", "readxl", "jsonlite", 
-                   "dplyr", "tidyr", "ggplot2", "plotly", "corrplot", 
-                   "shinyjs", "shinycssloaders"))
+# R Package Dependencies for DataScope Shiny App
+# Run this in R to install all required packages:
+
+install.packages(c(
+  # Core Shiny
+  "shiny",
+  "bslib",
+  "shinyjs",
+  "shinyWidgets",
+  "shinyFeedback",
+  "waiter",
+  
+  # Data I/O
+  "readr",
+  "readxl",
+  "jsonlite",
+  
+  # Data Manipulation
+  "dplyr",
+  "tidyr",
+  "recipes",
+  "purrr",
+  
+  # Visualization
+  "ggplot2",
+  "plotly",
+  "corrplot",
+  "GGally",
+  "thematic",
+  
+  # Statistical Analysis
+  "moments",
+  "fitdistrplus",
+  "naniar",
+  "MASS",
+  
+  # Data Summaries & Tables
+  "skimr",
+  "DT"
+))
