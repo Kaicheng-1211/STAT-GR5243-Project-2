@@ -119,6 +119,7 @@ edaUI <- function(id) {
                         choices = NULL,
                         multiple = TRUE, options = list(maxItems = 6)
                     ),
+                    downloadButton(ns("download_pairs"), "Download Pairs Plot", class = "btn-outline-primary mb-3"),
                     plotOutput(ns("pairs_plot"), height = "550px")
                 ),
                 nav_panel(
@@ -341,8 +342,8 @@ edaServer <- function(id, engineered_data) {
             skimr::skim(filtered_data())
         })
 
-        # ── Pairs Plot (FIX: only truly numeric, handle errors) ──
-        output$pairs_plot <- renderPlot({
+        # ── Pairs Plot ──
+        pairs_plot_obj <- reactive({
             req(filtered_data(), length(input$pairs_cols) >= 2)
             df <- filtered_data()
 
@@ -351,14 +352,18 @@ edaServer <- function(id, engineered_data) {
             valid_cols <- valid_cols[sapply(df[valid_cols], function(x) is.numeric(x) && is.atomic(x))]
             req(length(valid_cols) >= 2)
 
+            GGally::ggpairs(
+                df[valid_cols],
+                lower = list(continuous = GGally::wrap("points", alpha = 0.4, color = "#667eea")),
+                diag  = list(continuous = GGally::wrap("densityDiag", fill = "#667eea", alpha = 0.5)),
+                upper = list(continuous = GGally::wrap("cor", size = 4))
+            ) + theme_minimal(base_size = 11)
+        })
+
+        output$pairs_plot <- renderPlot({
             tryCatch(
                 {
-                    GGally::ggpairs(
-                        df[valid_cols],
-                        lower = list(continuous = GGally::wrap("points", alpha = 0.4, color = "#667eea")),
-                        diag  = list(continuous = GGally::wrap("densityDiag", fill = "#667eea", alpha = 0.5)),
-                        upper = list(continuous = GGally::wrap("cor", size = 4))
-                    ) + theme_minimal(base_size = 11)
+                    print(pairs_plot_obj())
                 },
                 error = function(e) {
                     plot.new()
@@ -366,6 +371,14 @@ edaServer <- function(id, engineered_data) {
                 }
             )
         })
+
+        output$download_pairs <- downloadHandler(
+            filename = function() paste0("pairs_plot_", Sys.Date(), ".png"),
+            content = function(file) {
+                # ggsave natively supports saving GGally objects
+                ggsave(file, plot = pairs_plot_obj(), width = 12, height = 10, dpi = 150)
+            }
+        )
 
         # ── Spectral Analysis ──
         output$spectral_plot <- plotly::renderPlotly({
