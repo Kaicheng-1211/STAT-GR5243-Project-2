@@ -69,12 +69,6 @@ ui <- page_navbar(
         title = "Diagnostics",
         icon  = icon("stethoscope"),
         diagnosticsUI("diagnostics")
-    ),
-
-    # ── Dark Mode Toggle ──
-    nav_spacer(),
-    nav_item(
-        input_dark_mode(id = "dark_mode", mode = "light")
     )
 )
 
