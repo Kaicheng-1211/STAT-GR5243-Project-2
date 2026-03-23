@@ -15,7 +15,7 @@ ui <- dashboardPage(
   dashboardHeader(title = "📊 Data Analysis App"),
   
   dashboardSidebar(
-    sidebarMenu(
+    sidebarMenu(id = "main_nav",
       menuItem("User Guide", tabName = "guide", icon = icon("book")),
       menuItem("Upload Data", tabName = "upload", icon = icon("upload")),
       menuItem("Data Cleaning", tabName = "clean", icon = icon("broom")),
@@ -47,35 +47,9 @@ ui <- dashboardPage(
     
     tabItems(
       
-      # Guide
+      # Guide (use modular guideUI)
       tabItem(tabName = "guide",
-              fluidRow(
-                box(width = 12, title = "Welcome", status = "primary",
-                    h3("Data Analysis App User Guide"),
-                    
-                    p("This app allows users to upload datasets, clean and preprocess data, perform feature engineering, and conduct exploratory data analysis interactively."),
-                    
-                    tags$hr(),
-                    
-                    h4("Steps to use the app"),
-                    tags$ol(
-                      tags$li("Upload a CSV, Excel, JSON, or RDS dataset, or choose a built-in dataset."),
-                      tags$li("Use the Data Cleaning tab to remove missing values, duplicates, or scale numeric variables."),
-                      tags$li("Use the Feature Engineering tab to create new variables or apply transformations."),
-                      tags$li("Use the EDA tab to generate plots, summaries, and correlation analysis.")
-                    ),
-                    
-                    tags$hr(),
-                    
-                    h4("Tips"),
-                    tags$ul(
-                      tags$li("Histogram and boxplot work best with numeric variables."),
-                      tags$li("If your dataset has missing values, clean them first before plotting."),
-                      tags$li("Use built-in datasets like iris to quickly test the app.")
-                    )
-                    
-                )
-              )
+              guideUI("guide")
       ),
       
       # Upload
@@ -173,6 +147,23 @@ server <- function(input, output, session) {
       runjs("document.body.classList.add('dark-mode');")
     } else {
       runjs("document.body.classList.remove('dark-mode');")
+    }
+  })
+  
+  # 接入模块化 Guide 的跳转信号
+  target_tab <- guideServer("guide")
+  observeEvent(target_tab(), {
+    req(target_tab())
+    mapped <- switch(target_tab(),
+                     "tab_upload" = "upload",
+                     "tab_cleaning" = "clean",
+                     "tab_feature" = "feature",
+                     "tab_eda" = "eda",
+                     "tab_dist" = "", # 无对应项，忽略或扩展为新 tab
+                     "tab_diag" = "",
+                     NULL)
+    if (!is.null(mapped) && nzchar(mapped)) {
+      shinydashboard::updateTabItems(session, "main_nav", selected = mapped)
     }
   })
   
