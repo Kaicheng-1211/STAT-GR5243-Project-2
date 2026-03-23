@@ -10,28 +10,20 @@ edaUI <- function(id) {
         layout_column_wrap(
             width = 1 / 4,
             value_box(
-                title = "Rows",
-                value = textOutput(ns("kpi_rows")),
-                showcase = icon("table"),
-                theme = "primary"
+                title = "Rows", value = textOutput(ns("kpi_rows")),
+                showcase = icon("table"), theme = "primary"
             ),
             value_box(
-                title = "Columns",
-                value = textOutput(ns("kpi_cols")),
-                showcase = icon("columns"),
-                theme = "success"
+                title = "Columns", value = textOutput(ns("kpi_cols")),
+                showcase = icon("columns"), theme = "success"
             ),
             value_box(
-                title = "Missing Cells",
-                value = textOutput(ns("kpi_missing")),
-                showcase = icon("exclamation-triangle"),
-                theme = "warning"
+                title = "Missing Cells", value = textOutput(ns("kpi_missing")),
+                showcase = icon("exclamation-triangle"), theme = "warning"
             ),
             value_box(
-                title = "Numeric / Categorical",
-                value = textOutput(ns("kpi_types")),
-                showcase = icon("tags"),
-                theme = "info"
+                title = "Numeric / Categorical", value = textOutput(ns("kpi_types")),
+                showcase = icon("tags"), theme = "info"
             )
         ),
         br(),
@@ -43,12 +35,9 @@ edaUI <- function(id) {
                 width = 300,
                 selectInput(ns("plot_type"), "Chart Type",
                     choices = c(
-                        "Histogram" = "histogram",
-                        "Density" = "density",
-                        "Scatter" = "scatter",
-                        "Boxplot" = "boxplot",
-                        "Violin" = "violin",
-                        "Bar Chart" = "bar",
+                        "Histogram" = "histogram", "Density" = "density",
+                        "Scatter" = "scatter", "Boxplot" = "boxplot",
+                        "Violin" = "violin", "Bar Chart" = "bar",
                         "QQ-Plot" = "qq"
                     )
                 ),
@@ -79,7 +68,17 @@ edaUI <- function(id) {
                     choices = NULL,
                     options = list(placeholder = "None")
                 ),
-                uiOutput(ns("filter_controls"))
+                uiOutput(ns("filter_controls")),
+                tags$hr(),
+
+                # Downloads
+                downloadButton(ns("download_plot"), "Download Current Plot",
+                    class = "btn-outline-primary w-100"
+                ),
+                br(), br(),
+                downloadButton(ns("download_summary"), "Download Summary",
+                    class = "btn-outline-success w-100"
+                )
             ),
 
             # Main area with tabs
@@ -98,13 +97,13 @@ edaUI <- function(id) {
                             width = 200,
                             selectInput(ns("corr_method"), "Method",
                                 choices = c(
-                                    "Pearson" = "pearson",
-                                    "Spearman" = "spearman",
+                                    "Pearson" = "pearson", "Spearman" = "spearman",
                                     "Kendall" = "kendall"
                                 )
-                            )
+                            ),
+                            sliderInput(ns("corr_fontsize"), "Label Size", min = 0.4, max = 1.2, value = 0.7, step = 0.1)
                         ),
-                        plotOutput(ns("corr_plot"), height = "500px")
+                        plotOutput(ns("corr_plot"), height = "600px")
                     )
                 ),
                 nav_panel(
@@ -115,7 +114,7 @@ edaUI <- function(id) {
                 nav_panel(
                     title = "Pairs Plot",
                     icon = icon("th"),
-                    helpText("Select up to 6 numeric columns for the pairs plot:"),
+                    helpText("Select 2-6 numeric columns for the pairs plot:"),
                     selectizeInput(ns("pairs_cols"), "Columns",
                         choices = NULL,
                         multiple = TRUE, options = list(maxItems = 6)
@@ -128,8 +127,7 @@ edaUI <- function(id) {
                     selectizeInput(ns("spectral_col"), "Numeric Column", choices = NULL),
                     checkboxInput(ns("spectral_smooth"), "Apply Daniell Smoothing", value = TRUE),
                     plotly::plotlyOutput(ns("spectral_plot"), height = "400px"),
-                    helpText("The periodogram shows dominant frequencies/cycles in the data.
-                    Useful for time-series-like variables (e.g., financial, sensor data).")
+                    helpText("The periodogram shows dominant frequencies/cycles in the data.")
                 )
             )
         )
@@ -152,7 +150,7 @@ edaServer <- function(id, engineered_data) {
                 if (is.numeric(df[[col]])) {
                     rng <- input$filter_range
                     if (!is.null(rng)) {
-                        df <- df[df[[col]] >= rng[1] & df[[col]] <= rng[2], , drop = FALSE]
+                        df <- df[!is.na(df[[col]]) & df[[col]] >= rng[1] & df[[col]] <= rng[2], , drop = FALSE]
                     }
                 } else {
                     vals <- input$filter_cat_vals
@@ -161,7 +159,6 @@ edaServer <- function(id, engineered_data) {
                     }
                 }
             }
-
             df
         })
 
@@ -177,10 +174,7 @@ edaServer <- function(id, engineered_data) {
             updateSelectizeInput(session, "y_var", choices = num_cols)
             updateSelectizeInput(session, "color_var", choices = c("", cat_cols))
             updateSelectizeInput(session, "filter_col", choices = c("", all_cols))
-            updateSelectizeInput(session, "pairs_cols",
-                choices = num_cols,
-                selected = head(num_cols, 4)
-            )
+            updateSelectizeInput(session, "pairs_cols", choices = num_cols, selected = head(num_cols, 4))
             updateSelectizeInput(session, "spectral_col", choices = num_cols)
         })
 
@@ -193,14 +187,10 @@ edaServer <- function(id, engineered_data) {
 
             if (is.numeric(df[[col]])) {
                 rng <- range(df[[col]], na.rm = TRUE)
-                sliderInput(ns("filter_range"), "Range",
-                    min = rng[1], max = rng[2], value = rng
-                )
+                sliderInput(ns("filter_range"), "Range", min = rng[1], max = rng[2], value = rng)
             } else {
                 vals <- unique(as.character(df[[col]]))
-                checkboxGroupInput(ns("filter_cat_vals"), "Select Values",
-                    choices = vals, selected = vals
-                )
+                checkboxGroupInput(ns("filter_cat_vals"), "Select Values", choices = vals, selected = vals)
             }
         })
 
@@ -222,13 +212,12 @@ edaServer <- function(id, engineered_data) {
         })
         output$kpi_types <- renderText({
             req(filtered_data())
-            df <- filtered_data()
-            n_num <- sum(sapply(df, is.numeric))
-            paste0(n_num, " / ", ncol(df) - n_num)
+            n_num <- sum(sapply(filtered_data(), is.numeric))
+            paste0(n_num, " / ", ncol(filtered_data()) - n_num)
         })
 
-        # ── Main Plot ──
-        output$main_plot <- plotly::renderPlotly({
+        # ── Reactive plot object (for download reuse) ──
+        current_plot <- reactive({
             req(filtered_data(), input$x_var)
             df <- filtered_data()
             x_var <- input$x_var
@@ -264,17 +253,12 @@ edaServer <- function(id, engineered_data) {
                     req(input$y_var, input$y_var %in% names(df))
                     p_base <- ggplot(df, aes(x = .data[[x_var]], y = .data[[input$y_var]])) +
                         geom_point(alpha = 0.6, color = "#667eea")
-                    if (input$add_trend) {
-                        p_base <- p_base + geom_smooth(method = "lm", color = "#e74c3c", se = TRUE)
-                    }
+                    if (input$add_trend) p_base <- p_base + geom_smooth(method = "lm", color = "#e74c3c", se = TRUE)
                     p_base
                 },
                 "boxplot" = {
                     if (!is.null(color_var)) {
-                        ggplot(df, aes(
-                            x = .data[[color_var]], y = .data[[x_var]],
-                            fill = .data[[color_var]]
-                        )) +
+                        ggplot(df, aes(x = .data[[color_var]], y = .data[[x_var]], fill = .data[[color_var]])) +
                             geom_boxplot(alpha = 0.7, show.legend = FALSE)
                     } else {
                         ggplot(df, aes(y = .data[[x_var]])) +
@@ -283,10 +267,7 @@ edaServer <- function(id, engineered_data) {
                 },
                 "violin" = {
                     if (!is.null(color_var)) {
-                        ggplot(df, aes(
-                            x = .data[[color_var]], y = .data[[x_var]],
-                            fill = .data[[color_var]]
-                        )) +
+                        ggplot(df, aes(x = .data[[color_var]], y = .data[[x_var]], fill = .data[[color_var]])) +
                             geom_violin(alpha = 0.7, show.legend = FALSE) +
                             geom_boxplot(width = 0.1, fill = "white", alpha = 0.8)
                     } else {
@@ -308,13 +289,34 @@ edaServer <- function(id, engineered_data) {
                 }
             )
 
-            p <- p + theme_minimal(base_size = 13) +
+            p + theme_minimal(base_size = 13) +
                 labs(title = paste(tools::toTitleCase(input$plot_type), "of", x_var))
-
-            plotly::ggplotly(p)
         })
 
-        # ── Correlation Plot ──
+        # ── Main Plot ──
+        output$main_plot <- plotly::renderPlotly({
+            plotly::ggplotly(current_plot())
+        })
+
+        # ── Download current plot as PNG ──
+        output$download_plot <- downloadHandler(
+            filename = function() paste0("eda_plot_", Sys.Date(), ".png"),
+            content = function(file) {
+                ggsave(file, plot = current_plot(), width = 10, height = 6, dpi = 150)
+            }
+        )
+
+        # ── Download summary stats as CSV ──
+        output$download_summary <- downloadHandler(
+            filename = function() paste0("summary_stats_", Sys.Date(), ".csv"),
+            content = function(file) {
+                df <- filtered_data()
+                summ <- compute_moments(df)
+                write.csv(summ, file, row.names = FALSE)
+            }
+        )
+
+        # ── Correlation Plot (BIGGER, with adjustable font) ──
         output$corr_plot <- renderPlot({
             req(filtered_data())
             df <- filtered_data()
@@ -325,8 +327,8 @@ edaServer <- function(id, engineered_data) {
 
             corrplot::corrplot(corr_mat,
                 method = "color", type = "upper",
-                tl.cex = 0.8, tl.col = "black",
-                addCoef.col = "black", number.cex = 0.7,
+                tl.cex = input$corr_fontsize, tl.col = "black",
+                addCoef.col = "black", number.cex = input$corr_fontsize,
                 col = colorRampPalette(c("#e74c3c", "white", "#667eea"))(200),
                 title = paste(tools::toTitleCase(input$corr_method), "Correlation"),
                 mar = c(0, 0, 2, 0)
@@ -339,19 +341,30 @@ edaServer <- function(id, engineered_data) {
             skimr::skim(filtered_data())
         })
 
-        # ── Pairs Plot ──
+        # ── Pairs Plot (FIX: only truly numeric, handle errors) ──
         output$pairs_plot <- renderPlot({
             req(filtered_data(), length(input$pairs_cols) >= 2)
             df <- filtered_data()
-            cols <- input$pairs_cols[input$pairs_cols %in% names(df)]
-            req(length(cols) >= 2)
 
-            GGally::ggpairs(df[cols],
-                lower = list(continuous = GGally::wrap("points", alpha = 0.4, color = "#667eea")),
-                diag = list(continuous = GGally::wrap("densityDiag", fill = "#667eea", alpha = 0.5)),
-                upper = list(continuous = GGally::wrap("cor", size = 4))
-            ) +
-                theme_minimal(base_size = 11)
+            # Only keep columns that are strictly numeric vectors (not factors/matrices)
+            valid_cols <- input$pairs_cols[input$pairs_cols %in% names(df)]
+            valid_cols <- valid_cols[sapply(df[valid_cols], function(x) is.numeric(x) && is.atomic(x))]
+            req(length(valid_cols) >= 2)
+
+            tryCatch(
+                {
+                    GGally::ggpairs(
+                        df[valid_cols],
+                        lower = list(continuous = GGally::wrap("points", alpha = 0.4, color = "#667eea")),
+                        diag  = list(continuous = GGally::wrap("densityDiag", fill = "#667eea", alpha = 0.5)),
+                        upper = list(continuous = GGally::wrap("cor", size = 4))
+                    ) + theme_minimal(base_size = 11)
+                },
+                error = function(e) {
+                    plot.new()
+                    text(0.5, 0.5, paste("Pairs plot error:", e$message), cex = 1.2, col = "#e74c3c")
+                }
+            )
         })
 
         # ── Spectral Analysis ──
@@ -361,30 +374,23 @@ edaServer <- function(id, engineered_data) {
             col <- input$spectral_col
             req(col %in% names(df))
 
-            x <- na.omit(df[[col]])
+            x <- na.omit(as.numeric(df[[col]]))
             req(length(x) > 10)
 
-            # Compute periodogram
             if (input$spectral_smooth) {
                 spec_result <- spectrum(x, spans = c(3, 5), plot = FALSE)
             } else {
                 spec_result <- spectrum(x, plot = FALSE)
             }
 
-            spec_df <- data.frame(
-                Frequency = spec_result$freq,
-                Power = spec_result$spec
-            )
+            spec_df <- data.frame(Frequency = spec_result$freq, Power = spec_result$spec)
 
             p <- ggplot(spec_df, aes(x = Frequency, y = Power)) +
                 geom_line(color = "#667eea", linewidth = 0.8) +
                 geom_area(fill = "#667eea", alpha = 0.15) +
                 scale_y_log10() +
                 theme_minimal(base_size = 13) +
-                labs(
-                    title = paste("Periodogram:", col),
-                    x = "Frequency", y = "Spectral Density (log scale)"
-                )
+                labs(title = paste("Periodogram:", col), x = "Frequency", y = "Spectral Density (log)")
 
             plotly::ggplotly(p)
         })

@@ -91,9 +91,13 @@ cleaningUI <- function(id) {
             ),
             tags$hr(),
 
-            # ── Apply & Download ──
+            # ── Apply, Reset & Download ──
             actionButton(ns("apply_cleaning"), "Apply Cleaning",
                 class = "btn-primary btn-block w-100", icon = icon("check")
+            ),
+            br(), br(),
+            actionButton(ns("reset_cleaning"), "Reset to Original",
+                class = "btn-outline-secondary w-100", icon = icon("undo")
             ),
             br(), br(),
             downloadButton(ns("download_data"), "Download Cleaned Data",
@@ -140,7 +144,6 @@ cleaningServer <- function(id, uploaded_data) {
     moduleServer(id, function(input, output, session) {
         ns <- session$ns
 
-        # ── Working copy (starts as uploaded data) ──
         cleaned <- reactiveVal(NULL)
         cleaning_log <- reactiveVal("")
 
@@ -159,6 +162,14 @@ cleaningServer <- function(id, uploaded_data) {
             updateSelectizeInput(session, "encode_cols", choices = cat_cols, selected = NULL)
         })
 
+        # ── Reset to original ──
+        observeEvent(input$reset_cleaning, {
+            req(uploaded_data())
+            cleaned(uploaded_data())
+            cleaning_log("Reset to original data.")
+            showNotification("Data reset to original.", type = "message")
+        })
+
         # ── Apply cleaning pipeline ──
         observeEvent(input$apply_cleaning, {
             req(uploaded_data())
@@ -171,7 +182,7 @@ cleaningServer <- function(id, uploaded_data) {
                 df <- na.omit(df)
                 log_lines <- c(
                     log_lines,
-                    paste0("✅ Removed ", n_before - nrow(df), " rows with missing values")
+                    paste0("Removed ", n_before - nrow(df), " rows with missing values")
                 )
             } else if (input$na_strategy == "remove_cols") {
                 thresh <- input$na_col_threshold / 100
@@ -182,15 +193,16 @@ cleaningServer <- function(id, uploaded_data) {
                     log_lines <- c(
                         log_lines,
                         paste0(
-                            "✅ Removed ", length(cols_to_drop), " columns with >",
+                            "Removed ", length(cols_to_drop), " columns with >",
                             input$na_col_threshold, "% missing: ", paste(cols_to_drop, collapse = ", ")
                         )
                     )
                 }
             } else if (input$na_strategy == "impute") {
-                num_cols <- names(df)[sapply(df, is.numeric)]
                 imputed_count <- 0
 
+                # Impute NUMERIC columns with mean/median/mode
+                num_cols <- names(df)[sapply(df, is.numeric)]
                 for (col in num_cols) {
                     n_na <- sum(is.na(df[[col]]))
                     if (n_na > 0) {
@@ -206,10 +218,26 @@ cleaningServer <- function(id, uploaded_data) {
                         imputed_count <- imputed_count + n_na
                     }
                 }
+
+                # Impute CHARACTER/FACTOR columns with mode (most frequent value)
+                char_cols <- names(df)[sapply(df, function(x) is.character(x) | is.factor(x))]
+                for (col in char_cols) {
+                    n_na <- sum(is.na(df[[col]]))
+                    if (n_na > 0) {
+                        tab <- table(df[[col]])
+                        mode_val <- names(tab[which.max(tab)])
+                        df[[col]][is.na(df[[col]])] <- mode_val
+                        imputed_count <- imputed_count + n_na
+                    }
+                }
+
                 if (imputed_count > 0) {
                     log_lines <- c(
                         log_lines,
-                        paste0("✅ Imputed ", imputed_count, " missing values using ", input$impute_method)
+                        paste0(
+                            "Imputed ", imputed_count, " missing values (numeric: ",
+                            input$impute_method, ", categorical: mode)"
+                        )
                     )
                 }
             }
@@ -217,23 +245,20 @@ cleaningServer <- function(id, uploaded_data) {
             # 2. Duplicates
             if (input$remove_dups) {
                 n_before <- nrow(df)
-                df <- distinct(df)
+                df <- dplyr::distinct(df)
                 n_removed <- n_before - nrow(df)
                 if (n_removed > 0) {
-                    log_lines <- c(
-                        log_lines,
-                        paste0("✅ Removed ", n_removed, " duplicate rows")
-                    )
+                    log_lines <- c(log_lines, paste0("Removed ", n_removed, " duplicate rows"))
                 }
             }
 
-            # 3. Scaling
+            # 3. Scaling — FIX: use as.numeric(scale()) to avoid matrix columns
             if (input$scale_method != "none") {
                 num_cols <- names(df)[sapply(df, is.numeric)]
                 if (length(num_cols) > 0) {
                     if (input$scale_method == "zscore") {
-                        df[num_cols] <- lapply(df[num_cols], scale)
-                        log_lines <- c(log_lines, "✅ Applied Z-score standardization")
+                        df[num_cols] <- lapply(df[num_cols], function(x) as.numeric(scale(x)))
+                        log_lines <- c(log_lines, "Applied Z-score standardization")
                     } else if (input$scale_method == "minmax") {
                         df[num_cols] <- lapply(df[num_cols], function(x) {
                             rng <- range(x, na.rm = TRUE)
@@ -242,7 +267,7 @@ cleaningServer <- function(id, uploaded_data) {
                             }
                             (x - rng[1]) / (rng[2] - rng[1])
                         })
-                        log_lines <- c(log_lines, "✅ Applied Min-Max scaling [0, 1]")
+                        log_lines <- c(log_lines, "Applied Min-Max scaling [0, 1]")
                     } else if (input$scale_method == "robust") {
                         df[num_cols] <- lapply(df[num_cols], function(x) {
                             med <- median(x, na.rm = TRUE)
@@ -252,7 +277,7 @@ cleaningServer <- function(id, uploaded_data) {
                             }
                             (x - med) / iqr_val
                         })
-                        log_lines <- c(log_lines, "✅ Applied Robust scaling (median/IQR)")
+                        log_lines <- c(log_lines, "Applied Robust scaling (median/IQR)")
                     }
                 }
             }
@@ -267,7 +292,7 @@ cleaningServer <- function(id, uploaded_data) {
                     }
                     log_lines <- c(
                         log_lines,
-                        paste0("✅ Label-encoded: ", paste(input$encode_cols, collapse = ", "))
+                        paste0("Label-encoded: ", paste(input$encode_cols, collapse = ", "))
                     )
                 } else if (input$encode_method == "onehot") {
                     for (col in input$encode_cols) {
@@ -279,7 +304,7 @@ cleaningServer <- function(id, uploaded_data) {
                     }
                     log_lines <- c(
                         log_lines,
-                        paste0("✅ One-hot encoded: ", paste(input$encode_cols, collapse = ", "))
+                        paste0("One-hot encoded: ", paste(input$encode_cols, collapse = ", "))
                     )
                 }
             }
@@ -323,16 +348,13 @@ cleaningServer <- function(id, uploaded_data) {
                     action_label <- if (input$outlier_action == "remove") "removed" else "winsorized"
                     log_lines <- c(
                         log_lines,
-                        paste0(
-                            "✅ ", outlier_count, " outliers ", action_label,
-                            " (", input$outlier_method, " method)"
-                        )
+                        paste0(outlier_count, " outliers ", action_label, " (", input$outlier_method, " method)")
                     )
                 }
             }
 
             if (length(log_lines) == 0) {
-                log_lines <- "ℹ️ No changes applied (all settings at default)."
+                log_lines <- "No changes applied (all settings at default)."
             }
 
             cleaned(as.data.frame(df))
@@ -355,18 +377,20 @@ cleaningServer <- function(id, uploaded_data) {
 
         output$before_summary <- renderPrint({
             req(uploaded_data())
-            cat("Dimensions:", nrow(uploaded_data()), "rows ×", ncol(uploaded_data()), "cols\n")
-            cat("Missing:", sum(is.na(uploaded_data())), "\n")
-            cat("Duplicates:", nrow(uploaded_data()) - nrow(distinct(uploaded_data())), "\n\n")
-            str(uploaded_data(), give.attr = FALSE)
+            df <- uploaded_data()
+            cat("Dimensions:", nrow(df), "rows x", ncol(df), "cols\n")
+            cat("Missing:", sum(is.na(df)), "\n")
+            cat("Duplicates:", nrow(df) - nrow(dplyr::distinct(df)), "\n\n")
+            str(df, give.attr = FALSE)
         })
 
         output$after_summary <- renderPrint({
             req(cleaned())
-            cat("Dimensions:", nrow(cleaned()), "rows ×", ncol(cleaned()), "cols\n")
-            cat("Missing:", sum(is.na(cleaned())), "\n")
-            cat("Duplicates:", nrow(cleaned()) - nrow(distinct(cleaned())), "\n\n")
-            str(cleaned(), give.attr = FALSE)
+            df <- cleaned()
+            cat("Dimensions:", nrow(df), "rows x", ncol(df), "cols\n")
+            cat("Missing:", sum(is.na(df)), "\n")
+            cat("Duplicates:", nrow(df) - nrow(dplyr::distinct(df)), "\n\n")
+            str(df, give.attr = FALSE)
         })
 
         # ── Outlier visualization ──
@@ -376,10 +400,9 @@ cleaningServer <- function(id, uploaded_data) {
             num_cols <- names(df)[sapply(df, is.numeric)]
             req(length(num_cols) > 0)
 
-            # Show boxplots for first 8 numeric columns
             cols_to_show <- head(num_cols, 8)
             df_long <- tidyr::pivot_longer(df[cols_to_show],
-                cols = everything(),
+                cols = tidyr::everything(),
                 names_to = "Variable", values_to = "Value"
             )
 
@@ -397,27 +420,24 @@ cleaningServer <- function(id, uploaded_data) {
             df <- cleaned()
             num_cols <- names(df)[sapply(df, is.numeric)]
 
-            outlier_summary <- purrr::map_dfr(num_cols, function(col) {
+            outlier_results <- lapply(num_cols, function(col) {
                 x <- df[[col]]
                 q1 <- quantile(x, 0.25, na.rm = TRUE)
                 q3 <- quantile(x, 0.75, na.rm = TRUE)
                 iqr_val <- q3 - q1
                 n_iqr <- sum(!is.na(x) & (x < q1 - 1.5 * iqr_val | x > q3 + 1.5 * iqr_val))
-                z <- abs(scale(x))
+                z <- abs(as.numeric(scale(x)))
                 n_zscore <- sum(!is.na(z) & z > 3)
 
-                tibble::tibble(
-                    Column = col,
-                    IQR_Outliers = n_iqr,
-                    ZScore_Outliers = n_zscore,
-                    Min = round(min(x, na.rm = TRUE), 3),
-                    Max = round(max(x, na.rm = TRUE), 3),
-                    Mean = round(mean(x, na.rm = TRUE), 3),
-                    SD = round(sd(x, na.rm = TRUE), 3)
+                data.frame(
+                    Column = col, IQR_Outliers = n_iqr, ZScore_Outliers = n_zscore,
+                    Min = round(min(x, na.rm = TRUE), 3), Max = round(max(x, na.rm = TRUE), 3),
+                    Mean = round(mean(x, na.rm = TRUE), 3), SD = round(sd(x, na.rm = TRUE), 3),
+                    stringsAsFactors = FALSE
                 )
             })
 
-            datatable(outlier_summary,
+            datatable(do.call(rbind, outlier_results),
                 options = list(dom = "ft", scrollX = TRUE),
                 rownames = FALSE, class = "compact stripe hover"
             )
@@ -429,7 +449,6 @@ cleaningServer <- function(id, uploaded_data) {
             content = function(file) write.csv(cleaned(), file, row.names = FALSE)
         )
 
-        # Return cleaned data for downstream
         return(reactive({
             cleaned()
         }))
