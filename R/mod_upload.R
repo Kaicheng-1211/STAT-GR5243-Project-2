@@ -42,7 +42,13 @@ uploadUI <- function(id) {
             tags$hr(),
 
             # Data info
-            uiOutput(ns("data_info"))
+            uiOutput(ns("data_info")),
+            tags$hr(),
+
+            # Reset Button
+            actionButton(ns("reset_upload"), "Clear Data",
+                class = "btn-outline-danger w-100", icon = icon("trash")
+            )
         ),
 
         # Main panel
@@ -98,6 +104,13 @@ uploadServer <- function(id) {
             }
 
             NULL
+        })
+
+        # ── Reset / Clear Data ──
+        observeEvent(input$reset_upload, {
+            shinyjs::reset("file")
+            shinyWidgets::updateRadioGroupButtons(session, "builtin", selected = "None")
+            showNotification("Uploaded data cleared.", type = "message")
         })
 
         # ── Built-in dataset description ──

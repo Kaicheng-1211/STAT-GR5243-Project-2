@@ -241,6 +241,12 @@ diagnosticsServer <- function(id, engineered_data) {
 
             if (nrow(influential) == 0) {
                 influential <- data.frame(Message = "No influential points detected (all Cook's D < 4/n)")
+            } else {
+                influential$Status <- factor(
+                    influential$Status,
+                    levels = c("High Influence + Leverage", "High Influence", "High Leverage", "Normal"),
+                    ordered = TRUE
+                )
             }
 
             datatable(influential,
@@ -290,7 +296,14 @@ diagnosticsServer <- function(id, engineered_data) {
         output$influence_table <- renderDT({
             req(model_results())
             diag <- model_results()$diagnostics
-            diag <- diag[order(-diag$Cooks_Distance), ]
+
+            diag$Status <- factor(
+                diag$Status,
+                levels = c("High Influence + Leverage", "High Influence", "High Leverage", "Normal"),
+                ordered = TRUE
+            )
+
+            diag <- diag[order(diag$Status, -diag$Cooks_Distance), ]
 
             datatable(diag,
                 options = list(pageLength = 15, scrollX = TRUE, dom = "lfrtip"),
