@@ -72,6 +72,12 @@ featureUI <- function(id) {
             # ── Undo ──
             actionButton(ns("undo_last"), "Undo Last Change",
                 class = "btn-outline-danger w-100", icon = icon("undo")
+            ),
+            tags$hr(),
+
+            # ── Download ──
+            downloadButton(ns("download_features"), "Download Dataset",
+                class = "btn-outline-success w-100"
             )
         ),
 
@@ -397,6 +403,12 @@ featureServer <- function(id, cleaned_data) {
                     fontWeight = "bold"
                 )
         })
+
+        # ── Download Handler ──
+        output$download_features <- downloadHandler(
+            filename = function() paste0("engineered_data_", Sys.Date(), ".csv"),
+            content = function(file) write.csv(feature_data(), file, row.names = FALSE)
+        )
 
         # Return for downstream
         return(reactive({
