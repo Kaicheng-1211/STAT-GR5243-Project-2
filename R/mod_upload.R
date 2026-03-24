@@ -24,7 +24,7 @@ uploadUI <- function(id) {
                 inputId = ns("builtin"),
                 label = tagList(icon("database"), " Or Use a Built-in Dataset"),
                 choices = c("None", names(BUILTIN_DATASETS)),
-                selected = "iris",
+                selected = "None",
                 direction = "vertical",
                 justified = TRUE,
                 size = "sm",
@@ -109,7 +109,7 @@ uploadServer <- function(id) {
         # ── Reset / Clear Data ──
         observeEvent(input$reset_upload, {
             shinyjs::reset("file")
-            shinyWidgets::updateRadioGroupButtons(session, "builtin", selected = "iris")
+            shinyWidgets::updateRadioGroupButtons(session, "builtin", selected = "None")
             showNotification("Uploaded data cleared.", type = "message")
         })
 

@@ -16,29 +16,9 @@ guideUI <- function(id) {
          all without writing a single line of code.")
         ),
 
-        div(
-            class = "guide-nav",
-            h4("Jump to Section", style = "font-weight: 600; margin-bottom: 0.75rem;"),
-            tags$ul(
-                style = "list-style: none; padding-left: 0; margin-bottom: 1.5rem;",
-                tags$li(tags$a(href = "#quick-start", "Quick Start")),
-                tags$li(tags$a(href = "#upload-data", "1. Upload Your Data")),
-                tags$li(tags$a(href = "#clean-preprocess", "2. Clean & Preprocess")),
-                tags$li(tags$a(href = "#feature-engineering", "3. Engineer Features")),
-                tags$li(tags$a(href = "#eda-section", "4. Explore (EDA)")),
-                tags$li(tags$a(href = "#distribution-lab", "5. Distribution Fitting Lab")),
-                tags$li(tags$a(href = "#diagnostics-section", "6. Regression Diagnostics")),
-                tags$li(tags$a(href = "#faq-section", "Tips & FAQ"))
-            )
-        ),
-
         # Quick Start Steps
+        h4("Quick Start", style = "font-weight: 600; margin-bottom: 1rem;"),
         div(
-            id = "quick-start",
-            h4("Quick Start", style = "font-weight: 600; margin-bottom: 1rem;")
-        ),
-        div(
-            id = "upload-data",
             class = "step-card",
             div(class = "step-number", "1"),
             div(
@@ -50,7 +30,6 @@ guideUI <- function(id) {
             )
         ),
         div(
-            id = "clean-preprocess",
             class = "step-card",
             div(class = "step-number", "2"),
             div(
@@ -61,7 +40,7 @@ guideUI <- function(id) {
            detect + treat outliers. See before/after comparisons in real time.")
             )
         ),
-        div(id = "feature-engineering",
+        div(
             class = "step-card",
             div(class = "step-number", "3"),
             div(
@@ -72,7 +51,7 @@ guideUI <- function(id) {
            previews update live as you make changes.")
             )
         ),
-        div(id = "eda-section",
+        div(
             class = "step-card",
             div(class = "step-number", "4"),
             div(
@@ -83,7 +62,7 @@ guideUI <- function(id) {
            kurtosis, and filter your data dynamically.")
             )
         ),
-        div(id = "distribution-lab",
+        div(
             class = "step-card",
             div(class = "step-number", "5"),
             div(
@@ -94,7 +73,7 @@ guideUI <- function(id) {
            view density overlays, and explore Cullen-Frey diagrams.")
             )
         ),
-        div(id = "diagnostics-section",
+        div(
             class = "step-card",
             div(class = "step-number", "6"),
             div(
