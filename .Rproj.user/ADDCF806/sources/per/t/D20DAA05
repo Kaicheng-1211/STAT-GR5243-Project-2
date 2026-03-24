@@ -1,0 +1,26 @@
+{
+    "id": "D20DAA05",
+    "path": "~/GitHub/STAT-GR5243-Project-2/app.R",
+    "project_path": "app.R",
+    "type": "r_source",
+    "hash": "1049508289",
+    "contents": "",
+    "dirty": false,
+    "created": 1774304216622.0,
+    "source_on_save": false,
+    "relative_order": 1,
+    "properties": {
+        "source_window_id": "",
+        "Source": "Source",
+        "cursorPosition": "111,20",
+        "scrollLine": "93"
+    },
+    "folds": "",
+    "lastKnownWriteTime": 1774300334,
+    "encoding": "UTF-8",
+    "collab_server": "",
+    "source_window": "",
+    "last_content_update": 1774300334,
+    "read_only": false,
+    "read_only_alternatives": []
+}
