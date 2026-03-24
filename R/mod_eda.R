@@ -338,8 +338,12 @@ edaServer <- function(id, engineered_data) {
 
         # ── Summary Statistics ──
         output$skim_output <- renderPrint({
-            req(filtered_data())
+          req(filtered_data())
+          if (nrow(filtered_data()) == 0) {
+            cat("No data available after filtering.")
+          } else {
             skimr::skim(filtered_data())
+          }
         })
 
         # ── Pairs Plot ──
@@ -361,15 +365,21 @@ edaServer <- function(id, engineered_data) {
         })
 
         output$pairs_plot <- renderPlot({
+          req(filtered_data(), input$pairs_cols)
+          if (length(input$pairs_cols) < 2) {
+            plot.new()
+            text(0.5, 0.5, "Please select at least 2 numeric columns.", cex = 1.2, col = "#666666")
+          } else {
             tryCatch(
-                {
-                    print(pairs_plot_obj())
-                },
-                error = function(e) {
-                    plot.new()
-                    text(0.5, 0.5, paste("Pairs plot error:", e$message), cex = 1.2, col = "#e74c3c")
-                }
+              {
+                print(pairs_plot_obj())
+              },
+              error = function(e) {
+                plot.new()
+                text(0.5, 0.5, paste("Pairs plot error:", e$message), cex = 1.2, col = "#e74c3c")
+              }
             )
+          }
         })
 
         output$download_pairs <- downloadHandler(
