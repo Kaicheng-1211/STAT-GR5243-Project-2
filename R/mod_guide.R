@@ -55,7 +55,59 @@ guideUI <- function(id) {
             div(class = "step-number", "6"),
             div(class = "step-content", h5("Regression Diagnostics"), p("Pick a response and predictors to fit a linear model. View Cook's Distance,
            leverage plots, DFFITS, and identify influential observations with color-coded
-           status indicators. Remove high-influence points with one click."))
+           status indicators. Remove high-influence points with one click.")
+            )
+        ),
+        br(),
+     
+
+        # FAQ / Tips Accordion
+        h4("Tips & FAQ", style = "font-weight: 600; margin-bottom: 1rem;"),
+        accordion(
+            id = ns("faq"),
+            open = FALSE,
+            accordion_panel(
+                title = "What file formats can I upload?",
+                icon  = icon("file"),
+                p("CSV (.csv), Excel (.xlsx, .xls), JSON (.json), TSV (.tsv), and R Data (.rds).
+           The app auto-detects the format from the file extension.")
+            ),
+            accordion_panel(
+                title = "How does missing value imputation work?",
+                icon  = icon("puzzle-piece"),
+                p("You can choose from several strategies: remove rows with NAs, remove columns
+           above a missing-% threshold, or impute using mean, median, or mode. The
+           imputation diagnostics panel shows you exactly which rows need attention and
+           how the distributions change pre/post imputation.")
+            ),
+            accordion_panel(
+                title = "What is Cook's Distance?",
+                icon  = icon("bullseye"),
+                p("Cook's Distance measures how much the fitted values of a regression model
+           change when a single observation is removed. Points with Cook's D > 4/n are
+           typically considered influential. The Diagnostics tab visualizes this and
+           lets you remove those points interactively.")
+            ),
+            accordion_panel(
+                title = "What distributions can I fit?",
+                icon  = icon("chart-area"),
+                p("Normal, Log-Normal, Exponential, Gamma, Weibull, and Poisson (for count data).
+           The app uses Maximum Likelihood Estimation (MLE) via the fitdistrplus package
+           and compares fits using AIC, BIC, and log-likelihood.")
+            ),
+            accordion_panel(
+                title = "What does the skewness indicator mean?",
+                icon  = icon("arrows-alt-h"),
+                p("Skewness measures the asymmetry of a distribution. Values near 0 indicate
+           symmetry; positive values indicate right-skew (long right tail); negative
+           values indicate left-skew. The app suggests transformations when |skew| > 0.5.")
+            ),
+            accordion_panel(
+                title = "Can I download my cleaned/transformed data?",
+                icon  = icon("download"),
+                p("Yes! The Data Cleaning tab has a download button that exports the current
+           state of your cleaned data as a CSV file.")
+            )
         )
     )
 }
