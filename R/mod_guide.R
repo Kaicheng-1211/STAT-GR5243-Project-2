@@ -23,7 +23,7 @@ guideUI <- function(id) {
             div(class = "step-number", "1"),
             div(
                 class = "step-content",
-                h5("Upload Your Data"),
+                h5(actionLink(ns("goto_upload"), "Upload Your Data")),
                 p("Go to the Upload Data tab. Upload a CSV, Excel (.xlsx), JSON, or RDS file,
            or select one of the built-in demo datasets (Iris, Mtcars, or Diamonds) to
            get started immediately.")
@@ -34,7 +34,7 @@ guideUI <- function(id) {
             div(class = "step-number", "2"),
             div(
                 class = "step-content",
-                h5("Clean & Preprocess"),
+                h5(actionLink(ns("goto_cleaning"), "Clean & Preprocess")),
                 p("Handle missing values (remove or impute with mean/median/mode), remove
            duplicates, scale numeric features, encode categorical variables, and
            detect + treat outliers. See before/after comparisons in real time.")
@@ -45,7 +45,7 @@ guideUI <- function(id) {
             div(class = "step-number", "3"),
             div(
                 class = "step-content",
-                h5("Engineer Features"),
+                h5(actionLink(ns("goto_feature"), "Engineer Features")),
                 p("Apply transformations (log, sqrt, Box-Cox, polynomial), create interaction
            terms, bin numeric variables, or write custom formulas. Watch distribution
            previews update live as you make changes.")
@@ -56,7 +56,7 @@ guideUI <- function(id) {
             div(class = "step-number", "4"),
             div(
                 class = "step-content",
-                h5("Explore (EDA)"),
+                h5(actionLink(ns("goto_eda"), "Explore (EDA)")),
                 p("Generate interactive plots (histograms, scatter, box, violin, density, bar),
            view correlation heatmaps, compute summary statistics with skewness and
            kurtosis, and filter your data dynamically.")
@@ -67,7 +67,7 @@ guideUI <- function(id) {
             div(class = "step-number", "5"),
             div(
                 class = "step-content",
-                h5("Distribution Fitting Lab"),
+                h5(actionLink(ns("goto_distributions"), "Distribution Fitting Lab")),
                 p("Select any numeric column and fit multiple probability distributions
            (Normal, Exponential, Gamma, Weibull, Log-Normal). Compare fits via AIC/BIC,
            view density overlays, and explore Cullen-Frey diagrams.")
@@ -78,7 +78,7 @@ guideUI <- function(id) {
             div(class = "step-number", "6"),
             div(
                 class = "step-content",
-                h5("Regression Diagnostics"),
+                h5(actionLink(ns("goto_diagnostics"), "Regression Diagnostics")),
                 p("Pick a response and predictors to fit a linear model. View Cook's Distance,
            leverage plots, DFFITS, and identify influential observations with color-coded
            status indicators. Remove high-influence points with one click.")
@@ -137,8 +137,33 @@ guideUI <- function(id) {
     )
 }
 
-guideServer <- function(id) {
+guideServer <- function(id, parent_session = NULL) {
     moduleServer(id, function(input, output, session) {
-        # Guide is read-only, no server logic needed
+        ps <- if (!is.null(parent_session)) parent_session else session
+
+        # Navigation link handlers: switch the main navbar to the target tab
+        observeEvent(input$goto_upload, {
+            updateNavbarPage(session = ps, inputId = "main_nav", selected = "upload")
+        }, ignoreInit = TRUE)
+
+        observeEvent(input$goto_cleaning, {
+            updateNavbarPage(session = ps, inputId = "main_nav", selected = "cleaning")
+        }, ignoreInit = TRUE)
+
+        observeEvent(input$goto_feature, {
+            updateNavbarPage(session = ps, inputId = "main_nav", selected = "feature")
+        }, ignoreInit = TRUE)
+
+        observeEvent(input$goto_eda, {
+            updateNavbarPage(session = ps, inputId = "main_nav", selected = "eda")
+        }, ignoreInit = TRUE)
+
+        observeEvent(input$goto_distributions, {
+            updateNavbarPage(session = ps, inputId = "main_nav", selected = "distributions")
+        }, ignoreInit = TRUE)
+
+        observeEvent(input$goto_diagnostics, {
+            updateNavbarPage(session = ps, inputId = "main_nav", selected = "diagnostics")
+        }, ignoreInit = TRUE)
     })
 }

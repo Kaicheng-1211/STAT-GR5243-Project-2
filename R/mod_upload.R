@@ -24,7 +24,7 @@ uploadUI <- function(id) {
                 inputId = ns("builtin"),
                 label = tagList(icon("database"), " Or Use a Built-in Dataset"),
                 choices = c("None", names(BUILTIN_DATASETS)),
-                selected = "None",
+                selected = "iris",
                 direction = "vertical",
                 justified = TRUE,
                 size = "sm",

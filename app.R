@@ -25,6 +25,7 @@ ui <- page_navbar(
   # ── Tab 1: User Guide ──
   nav_panel(
     title = "User Guide",
+    value = "guide",
     icon  = icon("book-open"),
     guideUI("guide")
   ),
@@ -32,6 +33,7 @@ ui <- page_navbar(
   # ── Tab 2: Upload Data ──
   nav_panel(
     title = "Upload Data",
+    value = "upload",
     icon  = icon("cloud-upload-alt"),
     uploadUI("upload")
   ),
@@ -39,6 +41,7 @@ ui <- page_navbar(
   # ── Tab 3: Data Cleaning ──
   nav_panel(
     title = "Data Cleaning",
+    value = "cleaning",
     icon  = icon("broom"),
     cleaningUI("cleaning")
   ),
@@ -46,6 +49,7 @@ ui <- page_navbar(
   # ── Tab 4: Feature Engineering ──
   nav_panel(
     title = "Feature Engineering",
+    value = "feature",
     icon  = icon("cogs"),
     featureUI("feature")
   ),
@@ -53,6 +57,7 @@ ui <- page_navbar(
   # ── Tab 5: EDA ──
   nav_panel(
     title = "EDA",
+    value = "eda",
     icon  = icon("chart-bar"),
     edaUI("eda")
   ),
@@ -60,6 +65,7 @@ ui <- page_navbar(
   # ── Tab 6: Distribution Lab ──
   nav_panel(
     title = "Distribution Lab",
+    value = "distributions",
     icon  = icon("bell-curve", lib = "glyphicon"),
     distributionsUI("distributions")
   ),
@@ -67,6 +73,7 @@ ui <- page_navbar(
   # ── Tab 7: Diagnostics ──
   nav_panel(
     title = "Diagnostics",
+    value = "diagnostics",
     icon  = icon("stethoscope"),
     diagnosticsUI("diagnostics")
   )
@@ -83,7 +90,7 @@ server <- function(input, output, session) {
   engineered_data <- featureServer("feature", cleaned_data)
   
   # ── Modules that consume the final dataset ──
-  guideServer("guide")
+  guideServer("guide", session)
   edaServer("eda", engineered_data)
   distributionsServer("distributions", engineered_data)
   diagnosticsServer("diagnostics", engineered_data)
